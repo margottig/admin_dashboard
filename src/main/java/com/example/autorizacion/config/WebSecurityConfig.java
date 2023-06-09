@@ -41,9 +41,16 @@ public class WebSecurityConfig {
 	protected SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http.
 		authorizeHttpRequests()
-		.requestMatchers("/", "/home")
-		.authenticated().anyRequest().permitAll().and()
-				.formLogin().permitAll().loginPage("/login").defaultSuccessUrl("/home").and().logout().permitAll();
+		.requestMatchers("/admin/**").hasRole("ADMIN")
+		.requestMatchers("/", "/home").authenticated()
+		.anyRequest().permitAll().and()
+				.formLogin()
+				.permitAll()
+				.loginPage("/login")
+				.defaultSuccessUrl("/home")
+				.and()
+				.logout()
+				.permitAll();
 
 		return http.build();
 	}

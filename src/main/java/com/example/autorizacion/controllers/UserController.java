@@ -2,6 +2,7 @@ package com.example.autorizacion.controllers;
 
 import java.security.Principal;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.example.autorizacion.models.User;
 import com.example.autorizacion.services.UserService;
+import com.example.autorizacion.validator.UserValidator;
 
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -25,6 +27,9 @@ public class UserController {
 		this.userService = userService;
 	}
 
+	@Autowired
+	private UserValidator userValidator;
+
 	@RequestMapping("/register")
 	public String registerForm(@Valid @ModelAttribute("user") User user) {
 		return "registrationPage.jsp";
@@ -33,10 +38,12 @@ public class UserController {
 	@PostMapping("/register")
 	public String registration(@Valid @ModelAttribute("user") User user, BindingResult result, Model model,
 			HttpSession session) {
+		
+		userValidator.validate(user, result);
 		if (result.hasErrors()) {
 			return "registrationPage.jsp";
 		}
-		userService.saveWithUserRole(user);
+		userService.saveUserWithAdminRole(user);
 		return "redirect:/login";
 	}
 
@@ -64,5 +71,12 @@ public class UserController {
 		model.addAttribute("currentUser", userService.findByUsername(username));
 		return "homePage.jsp";
 	}
+	
+	  @RequestMapping("/admin")
+	    public String adminPage(Principal principal, Model model) {
+	        String username = principal.getName();
+	        model.addAttribute("currentUser", userService.findByUsername(username));
+	        return "adminPage.jsp";
+	    }
 
 }
